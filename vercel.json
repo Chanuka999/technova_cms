@@ -1,19 +1,15 @@
 {
   "version": 2,
-  "name": "technova-cms",
-  "buildCommand": "cd client && npm install && npm run build",
-  "outputDirectory": "client/dist",
-  "devCommand": "cd client && npm run dev",
-  "installCommand": "cd client && npm install && cd ../server && npm install",
-  "rewrites": [
+  "name": "technova-cms-monorepo",
+  "comment": "⚠️ THIS CONFIG IS FOR DEPLOYING THE ENTIRE PROJECT AS ONE (NOT RECOMMENDED)",
+  "comment2": "For separate deployments, use server/vercel.json and client/vercel.json instead",
+  "builds": [],
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "@vercel/node@3"
-    }
-  }
+  "buildCommand": "echo 'Use separate deployment - see DEPLOY_SEPARATELY.md'",
+  "installCommand": "echo 'Use separate deployment - see DEPLOY_SEPARATELY.md'"
 }
