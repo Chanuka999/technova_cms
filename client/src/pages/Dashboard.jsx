@@ -15,10 +15,16 @@ import {
   ShoppingCart,
   People,
 } from "@mui/icons-material";
+import AdminDashboard from "../components/Dashboard/AdminDashboard";
 
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
   const displayName = user?.name?.trim() || "User";
+
+  // Show AdminDashboard for admin users
+  if (user?.role === "admin") {
+    return <AdminDashboard />;
+  }
 
   const stats = [
     {
