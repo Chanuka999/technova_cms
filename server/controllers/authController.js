@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { logActivity } = require("../middleware/activityLogger");
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -25,6 +26,17 @@ exports.register = async (req, res, next) => {
       phone,
       address,
     });
+
+    await logActivity(
+      user._id,
+      user.name,
+      user.role,
+      "CREATE",
+      "users",
+      `User account created: ${user.email}`,
+      { userId: user._id, email: user.email },
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+    );
 
     // Create token
     sendTokenResponse(user, 201, res);
@@ -79,6 +91,17 @@ exports.login = async (req, res, next) => {
       });
     }
 
+    await logActivity(
+      user._id,
+      user.name,
+      user.role,
+      "LOGIN",
+      "auth",
+      `User logged in: ${user.email}`,
+      { userId: user._id, email: user.email },
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+    );
+
     sendTokenResponse(user, 200, res);
   } catch (error) {
     res.status(400).json({
@@ -112,6 +135,17 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.logout = async (req, res, next) => {
   try {
+    await logActivity(
+      req.user._id,
+      req.user.name,
+      req.user.role,
+      "LOGOUT",
+      "auth",
+      `User logged out: ${req.user.email}`,
+      { userId: req.user._id, email: req.user.email },
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+    );
+
     res.status(200).json({
       success: true,
       data: {},

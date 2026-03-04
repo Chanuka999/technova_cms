@@ -41,13 +41,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { fetchTodayActivitySummary } from "../../redux/slices/activityLogSlice";
-import * as productService from "../../services/productService";
+import productService from "../../services/productService";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7c7c"];
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const { summary } = useSelector((state) => state.activityLogs);
   const [inventoryData, setInventoryData] = useState({
     totalProducts: 0,
@@ -59,30 +59,41 @@ const AdminDashboard = () => {
   const displayName = user?.name?.trim() || "Admin";
 
   useEffect(() => {
-    dispatch(fetchTodayActivitySummary());
-    loadInventoryData();
-  }, [dispatch]);
+    const refreshDashboardData = () => {
+      dispatch(fetchTodayActivitySummary());
+      loadInventoryData();
+    };
+
+    refreshDashboardData();
+
+    const intervalId = setInterval(refreshDashboardData, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [dispatch, token]);
 
   const loadInventoryData = async () => {
     try {
-      // Fetch products data
-      const response = await productService.getProducts();
-      if (response.success) {
-        const products = response.data;
+      const authToken = token || localStorage.getItem("token");
 
-        // Get low stock products (assuming stock < 10 is low)
-        const lowStockProds = products.filter((p) => p.stock < 10);
-
-        // Sort by stock for top/bottom info
-        const sorted = [...products].sort((a, b) => b.stock - a.stock);
-
-        setInventoryData({
-          totalProducts: products.length,
-          lowStockProducts: lowStockProds,
-          topProducts: sorted.slice(0, 5),
-          loading: false,
-        });
+      if (!authToken) {
+        setInventoryData((prev) => ({ ...prev, loading: false }));
+        return;
       }
+
+      const response = await productService.getProducts(authToken);
+      const products = Array.isArray(response) ? response : [];
+
+      const lowStockProds = products.filter((product) => product.stock < 10);
+      const sorted = [...products].sort(
+        (first, second) => second.stock - first.stock,
+      );
+
+      setInventoryData({
+        totalProducts: products.length,
+        lowStockProducts: lowStockProds,
+        topProducts: sorted.slice(0, 5),
+        loading: false,
+      });
     } catch (error) {
       console.error("Error loading inventory data:", error);
       setInventoryData((prev) => ({ ...prev, loading: false }));
@@ -243,7 +254,7 @@ const AdminDashboard = () => {
               <TableContainer>
                 <Table size="small">
                   <TableHead>
-                    <TableRow sx={{ backgroundColor: "#e8f5e9" }}>
+                    <TableRow sx={{ backgroundColor: "#5b6fe0" }}>
                       <TableCell>Product Name</TableCell>
                       <TableCell align="right">Stock Qty</TableCell>
                       <TableCell align="right">Status</TableCell>
@@ -301,7 +312,7 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#e3f2fd",
+                  backgroundColor: "#d1f049",
                   borderRadios: 1,
                   textAlign: "center",
                 }}
@@ -316,7 +327,7 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#f3e5f5",
+                  backgroundColor: "#d24ae7",
                   borderRadios: 1,
                   textAlign: "center",
                 }}
@@ -331,7 +342,7 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#e1f5fe",
+                  backgroundColor: "#82eb74",
                   borderRadios: 1,
                   textAlign: "center",
                 }}
@@ -346,7 +357,7 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#ffebee",
+                  backgroundColor: "#54d4eb",
                   borderRadios: 1,
                   textAlign: "center",
                 }}
@@ -361,7 +372,7 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#e0f2f1",
+                  backgroundColor: "#ee8ed9",
                   borderRadios: 1,
                   textAlign: "center",
                 }}
