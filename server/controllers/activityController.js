@@ -212,7 +212,21 @@ exports.getTodayActivitySummary = async (req, res, next) => {
     const totalUpdates = logs.filter((log) => log.action === "UPDATE").length;
     const totalDeletions = logs.filter((log) => log.action === "DELETE").length;
 
-    const activeUsers = [...new Set(logs.map((log) => log.userId.toString()))];
+    const activeUsers = [
+      ...new Set(
+        logs
+          .map((log) => {
+            if (!log.userId) {
+              return null;
+            }
+
+            return typeof log.userId === "object" && log.userId.toString
+              ? log.userId.toString()
+              : String(log.userId);
+          })
+          .filter(Boolean),
+      ),
+    ];
 
     res.status(200).json({
       success: true,
