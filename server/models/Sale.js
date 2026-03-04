@@ -98,8 +98,8 @@ const SaleSchema = new mongoose.Schema({
   },
 });
 
-// Generate invoice number before saving
-SaleSchema.pre("save", async function (next) {
+// Generate invoice number before validation
+SaleSchema.pre("validate", async function (next) {
   if (!this.invoiceNumber) {
     const count = await this.constructor.countDocuments();
     this.invoiceNumber = `INV-${Date.now()}-${count + 1}`;

@@ -38,16 +38,61 @@ import { logout } from "../redux/slices/authSlice";
 const drawerWidth = 240;
 
 const menuItems = [
-  { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
-  { text: "Products", icon: <InventoryIcon />, path: "/products" },
-  { text: "Categories", icon: <CategoryIcon />, path: "/categories" },
-  { text: "Sales", icon: <ShoppingCartIcon />, path: "/sales" },
-  { text: "Customers", icon: <PeopleIcon />, path: "/customers" },
-  { text: "Suppliers", icon: <LocalShippingIcon />, path: "/suppliers" },
-  { text: "Inventory", icon: <InventoryIcon />, path: "/inventory" },
-  { text: "Reports", icon: <AssessmentIcon />, path: "/reports" },
-  { text: "Users", icon: <PersonAddIcon />, path: "/users" },
-  { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
+  {
+    text: "Dashboard",
+    icon: <DashboardIcon />,
+    path: "/",
+    roles: ["admin", "manager", "cashier", "inventory"],
+  },
+  {
+    text: "Products",
+    icon: <InventoryIcon />,
+    path: "/products",
+    roles: ["admin", "manager", "cashier", "inventory"],
+  },
+  {
+    text: "Categories",
+    icon: <CategoryIcon />,
+    path: "/categories",
+    roles: ["admin", "manager", "inventory"],
+  },
+  {
+    text: "Sales",
+    icon: <ShoppingCartIcon />,
+    path: "/sales",
+    roles: ["admin", "manager", "cashier"],
+  },
+  {
+    text: "Customers",
+    icon: <PeopleIcon />,
+    path: "/customers",
+    roles: ["admin", "manager", "cashier"],
+  },
+  {
+    text: "Suppliers",
+    icon: <LocalShippingIcon />,
+    path: "/suppliers",
+    roles: ["admin", "manager", "inventory"],
+  },
+  {
+    text: "Inventory",
+    icon: <InventoryIcon />,
+    path: "/inventory",
+    roles: ["admin", "manager", "inventory"],
+  },
+  {
+    text: "Reports",
+    icon: <AssessmentIcon />,
+    path: "/reports",
+    roles: ["admin", "manager"],
+  },
+  { text: "Users", icon: <PersonAddIcon />, path: "/users", roles: ["admin"] },
+  {
+    text: "Settings",
+    icon: <SettingsIcon />,
+    path: "/settings",
+    roles: ["admin", "manager"],
+  },
 ];
 
 const Layout = ({ mode, onToggleThemeMode }) => {
@@ -57,6 +102,11 @@ const Layout = ({ mode, onToggleThemeMode }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+
+  // Filter menu items based on user role
+  const filteredMenuItems = menuItems.filter((item) =>
+    item.roles.includes(user?.role),
+  );
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -84,7 +134,7 @@ const Layout = ({ mode, onToggleThemeMode }) => {
       </Toolbar>
       <Divider />
       <List>
-        {menuItems.map((item) => (
+        {filteredMenuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
               selected={location.pathname === item.path}
