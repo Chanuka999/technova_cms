@@ -8,6 +8,18 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, role, phone, address } = req.body;
 
+    if (role === "admin") {
+      return res.status(403).json({
+        success: false,
+        error: "Admin accounts can only be created by an existing admin",
+      });
+    }
+
+    const allowedRolesForPublicRegister = ["manager", "cashier", "inventory"];
+    const safeRole = allowedRolesForPublicRegister.includes(role)
+      ? role
+      : "cashier";
+
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -22,7 +34,7 @@ exports.register = async (req, res, next) => {
       name,
       email,
       password,
-      role,
+      role: safeRole,
       phone,
       address,
     });

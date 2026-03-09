@@ -69,7 +69,7 @@ export const saleSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.sales.unshift(action.payload);
-        state.message = "Sale created successfully";
+        // Message removed - handled in component for bill download coordination
       })
       .addCase(createSale.rejected, (state, action) => {
         state.isLoading = false;
