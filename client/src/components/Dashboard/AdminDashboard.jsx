@@ -264,7 +264,7 @@ const AdminDashboard = () => {
                     {inventoryData.topProducts.slice(0, 5).map((product) => (
                       <TableRow
                         key={product._id}
-                        sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }}
+                        sx={{ "&:hover": { backgroundColor: "#5b6fe0" } }}
                       >
                         <TableCell>
                           <Typography
@@ -312,13 +312,22 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#d1f049",
-                  borderRadios: 1,
+                  backgroundColor: "#46610f",
+                  borderRadius: 1,
                   textAlign: "center",
+                  color: "#ffffff",
                 }}
               >
-                <Typography variant="h6">{summary.totalLogins}</Typography>
-                <Typography variant="caption" color="textSecondary">
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#ffffff" }}
+                >
+                  {summary.totalLogins}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "rgba(255,255,255,0.85)" }}
+                >
                   Logins
                 </Typography>
               </Box>
@@ -327,13 +336,22 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#d24ae7",
-                  borderRadios: 1,
+                  backgroundColor: "#7c2f87",
+                  borderRadius: 1,
                   textAlign: "center",
+                  color: "#ffffff",
                 }}
               >
-                <Typography variant="h6">{summary.totalCreations}</Typography>
-                <Typography variant="caption" color="textSecondary">
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#ffffff" }}
+                >
+                  {summary.totalCreations}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "rgba(255,255,255,0.85)" }}
+                >
                   Created
                 </Typography>
               </Box>
@@ -342,13 +360,22 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#82eb74",
-                  borderRadios: 1,
+                  backgroundColor: "#2f7d45",
+                  borderRadius: 1,
                   textAlign: "center",
+                  color: "#ffffff",
                 }}
               >
-                <Typography variant="h6">{summary.totalUpdates}</Typography>
-                <Typography variant="caption" color="textSecondary">
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#ffffff" }}
+                >
+                  {summary.totalUpdates}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "rgba(255,255,255,0.85)" }}
+                >
                   Updated
                 </Typography>
               </Box>
@@ -357,13 +384,22 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#54d4eb",
-                  borderRadios: 1,
+                  backgroundColor: "#1f6b7a",
+                  borderRadius: 1,
                   textAlign: "center",
+                  color: "#ffffff",
                 }}
               >
-                <Typography variant="h6">{summary.totalDeletions}</Typography>
-                <Typography variant="caption" color="textSecondary">
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#ffffff" }}
+                >
+                  {summary.totalDeletions}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "rgba(255,255,255,0.85)" }}
+                >
                   Deleted
                 </Typography>
               </Box>
@@ -372,13 +408,22 @@ const AdminDashboard = () => {
               <Box
                 sx={{
                   p: 2,
-                  backgroundColor: "#ee8ed9",
-                  borderRadios: 1,
+                  backgroundColor: "#8d4a87",
+                  borderRadius: 1,
                   textAlign: "center",
+                  color: "#ffffff",
                 }}
               >
-                <Typography variant="h6">{summary.activeUsersCount}</Typography>
-                <Typography variant="caption" color="textSecondary">
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#ffffff" }}
+                >
+                  {summary.activeUsersCount}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "rgba(255,255,255,0.85)" }}
+                >
                   Active Users
                 </Typography>
               </Box>

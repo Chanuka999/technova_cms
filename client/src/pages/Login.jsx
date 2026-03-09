@@ -27,6 +27,7 @@ import {
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { login, reset } from "../redux/slices/authSlice";
+import logosImage from "../images/logos.png";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -76,7 +77,10 @@ const Login = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        backgroundImage: `linear-gradient(rgba(22, 28, 72, 0.82), rgba(70, 36, 104, 0.84)), url(${logosImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         position: "relative",
         overflow: "hidden",
         "&::before": {
