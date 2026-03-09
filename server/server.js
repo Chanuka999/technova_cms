@@ -24,8 +24,8 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.json({ limit: "5mb" })); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true, limit: "5mb" })); // Parse URL-encoded bodies
 app.use(morgan("dev")); // Logging
 app.use(activityLoggerMiddleware); // Activity logging middleware
 

@@ -25,11 +25,12 @@ import {
   FormHelperText,
   Link,
 } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Add, Edit } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import {
   createProduct,
   getProducts,
+  updateProduct,
   reset,
 } from "../redux/slices/productSlice";
 import categoryService from "../services/categoryService";
@@ -42,6 +43,7 @@ const initialFormData = {
   stock: "",
   sku: "",
   description: "",
+  image: "",
 };
 
 const Products = () => {
@@ -53,6 +55,10 @@ const Products = () => {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
+  const [imagePreview, setImagePreview] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [categories, setCategories] = useState([]);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
 
@@ -93,12 +99,46 @@ const Products = () => {
 
   const handleOpenDialog = async () => {
     await loadCategories();
+    setIsEditMode(false);
+    setEditingProductId(null);
+    setFormData(initialFormData);
+    setImagePreview("");
+    setImageRemoved(false);
+    setOpenDialog(true);
+  };
+
+  const handleEditProduct = async (product) => {
+    await loadCategories();
+
+    setIsEditMode(true);
+    setEditingProductId(product._id);
+    setImageRemoved(false);
+
+    const existingImage =
+      product.image && product.image !== "no-image.jpg" ? product.image : "";
+
+    setFormData({
+      name: product.name || "",
+      category: product.category?._id || product.category || "",
+      price: String(product.price ?? ""),
+      costPrice: String(product.costPrice ?? ""),
+      stock: String(product.stock ?? ""),
+      sku: product.sku || "",
+      description: product.description || "",
+      image: existingImage,
+    });
+
+    setImagePreview(existingImage);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setFormData(initialFormData);
+    setImagePreview("");
+    setIsEditMode(false);
+    setEditingProductId(null);
+    setImageRemoved(false);
   };
 
   const handleChange = (event) => {
@@ -107,6 +147,48 @@ const Products = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+
+    const maxSizeInBytes = 2 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+      toast.error("Image size must be less than 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const imageData = reader.result;
+      if (typeof imageData === "string") {
+        setFormData((prev) => ({
+          ...prev,
+          image: imageData,
+        }));
+        setImagePreview(imageData);
+        setImageRemoved(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setFormData((prev) => ({
+      ...prev,
+      image: "",
+    }));
+    setImagePreview("");
+    setImageRemoved(true);
   };
 
   const handleSubmit = async (event) => {
@@ -133,13 +215,37 @@ const Products = () => {
       description: formData.description.trim() || undefined,
     };
 
-    const resultAction = await dispatch(createProduct(payload));
+    if (formData.image) {
+      payload.image = formData.image;
+    } else if (isEditMode && imageRemoved) {
+      payload.image = "no-image.jpg";
+    }
 
-    if (createProduct.fulfilled.match(resultAction)) {
-      toast.success("Product added successfully");
+    const resultAction = isEditMode
+      ? await dispatch(
+          updateProduct({
+            id: editingProductId,
+            productData: payload,
+          }),
+        )
+      : await dispatch(createProduct(payload));
+
+    const isSuccessAction = isEditMode
+      ? updateProduct.fulfilled.match(resultAction)
+      : createProduct.fulfilled.match(resultAction);
+
+    if (isSuccessAction) {
+      toast.success(
+        isEditMode
+          ? "Product updated successfully"
+          : "Product added successfully",
+      );
       handleCloseDialog();
     } else {
-      toast.error(resultAction.payload || "Failed to add product");
+      toast.error(
+        resultAction.payload ||
+          (isEditMode ? "Failed to update product" : "Failed to add product"),
+      );
     }
   };
 
@@ -160,23 +266,59 @@ const Products = () => {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>Image</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>SKU</TableCell>
               <TableCell align="right">Price</TableCell>
               <TableCell align="right">Cost</TableCell>
               <TableCell align="right">Stock</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center">
+                <TableCell colSpan={7} align="center">
                   {isLoading ? "Loading products..." : "No products found"}
                 </TableCell>
               </TableRow>
             ) : (
               products.map((product) => (
                 <TableRow key={product._id} hover>
+                  <TableCell>
+                    {product.image && product.image !== "no-image.jpg" ? (
+                      <Box
+                        component="img"
+                        src={product.image}
+                        alt={product.name}
+                        sx={{
+                          width: 52,
+                          height: 52,
+                          objectFit: "cover",
+                          borderRadius: 1,
+                          border: "1px solid",
+                          borderColor: "divider",
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: 1,
+                          border: "1px dashed",
+                          borderColor: "divider",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "text.secondary",
+                          fontSize: 12,
+                        }}
+                      >
+                        No Img
+                      </Box>
+                    )}
+                  </TableCell>
                   <TableCell>{product.name}</TableCell>
                   <TableCell>{product.sku || "-"}</TableCell>
                   <TableCell align="right">
@@ -186,6 +328,16 @@ const Products = () => {
                     ${Number(product.costPrice || 0).toFixed(2)}
                   </TableCell>
                   <TableCell align="right">{product.stock ?? 0}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Edit />}
+                      onClick={() => handleEditProduct(product)}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -199,7 +351,7 @@ const Products = () => {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>Add Product</DialogTitle>
+        <DialogTitle>{isEditMode ? "Edit Product" : "Add Product"}</DialogTitle>
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 0.5 }}>
@@ -291,6 +443,42 @@ const Products = () => {
                 multiline
                 rows={3}
               />
+
+              <Button variant="outlined" component="label">
+                {imagePreview ? "Change Product Image" : "Upload Product Image"}
+                <input
+                  hidden
+                  accept="image/*"
+                  type="file"
+                  onChange={handleImageChange}
+                />
+              </Button>
+
+              {(imagePreview || formData.image) && (
+                <Button
+                  variant="text"
+                  color="error"
+                  onClick={handleRemoveImage}
+                >
+                  Remove Image
+                </Button>
+              )}
+
+              {imagePreview && (
+                <Box
+                  component="img"
+                  src={imagePreview}
+                  alt="Selected product"
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    objectFit: "cover",
+                    borderRadius: 1,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                />
+              )}
             </Stack>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -311,7 +499,11 @@ const Products = () => {
               variant="contained"
               disabled={isLoading || categories.length === 0}
             >
-              {isLoading ? "Saving..." : "Save Product"}
+              {isLoading
+                ? "Saving..."
+                : isEditMode
+                  ? "Update Product"
+                  : "Save Product"}
             </Button>
           </DialogActions>
         </Box>
